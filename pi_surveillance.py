@@ -91,4 +91,35 @@ for f in camera.capture_continuous(rawCapture, format="bgr", use_video_port=True
             cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
     cv2.putText(frame, ts, (10, frame.shape[0] - 10), cv2.FONT_HERSHEY_SIMPLEX,
             0.35, (0, 0, 255), 1)
+    
+    if text == "Occupied":
+        if (timestamp - lastUploaded).seconds >= conf["min_upload_seconds"]:
+            motionCounter += 1
 
+            if motionCounter >= conf["min_motion_frames"]:
+                if conf["use_dropbox"]:
+                    t = TempImage()
+                    cv2.imwrite(t.path, frame)
+
+                    print ("[UPLOAD] {}".format(ts)
+                    path = "{base_path}/{timestamp}.jpg".format(
+                        base_path=conf["dropbox_base_path"], timestamp=ts)
+                    client.put_file(path, open(t.path, 'rb')
+                    t.cleanup()
+                
+                lastUploaded = timestamp
+                motionCounter = 0
+
+    else:
+        motionCounter = 0
+
+    #check to see if the frames should be displayed to screen
+    if conf["show_video"]:
+        cv2.imshow("Security Feed", frame)
+        key = cv2.waitKey(1) & 0xFF
+
+        if key == ord("q"):
+            break
+    
+    #clear stream in prep for next frame
+    rawCapture.truncate(0)
