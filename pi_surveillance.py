@@ -54,7 +54,7 @@ for f in camera.capture_continuous(rawCapture, format="bgr", use_video_port=True
 
     #resize the frame, convert to gray, and blur
     frame = imutils.resize(frame, width=500)
-    gray = cv2.cvtColor(fram, cv2.COLOR_BGR2GRAY)
+    gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     gray = cv2.GaussianBlur(gray, (21, 21), 0)
 
     #if average is None, initialize
@@ -72,7 +72,7 @@ for f in camera.capture_continuous(rawCapture, format="bgr", use_video_port=True
     #threshold delta image, dilate thresh image to fill in holes, then find contours
     thresh = cv2.threshold(frameDelta, conf["delta_thresh"], 255, cv2.THRESH_BINARY)[1]
     thresh = cv2.dilate(thresh, None, iterations=2)
-    (cnts, _) = cv2.findContours(thresh.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    _, cnts, _ = cv2.findContours(thresh.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
     #loop over contours
     for c in cnts:
@@ -101,10 +101,10 @@ for f in camera.capture_continuous(rawCapture, format="bgr", use_video_port=True
                     t = TempImage()
                     cv2.imwrite(t.path, frame)
 
-                    print ("[UPLOAD] {}".format(ts)
+                    print ("[UPLOAD] {}".format(ts))
                     path = "{base_path}/{timestamp}.jpg".format(
                         base_path=conf["dropbox_base_path"], timestamp=ts)
-                    client.put_file(path, open(t.path, 'rb')
+                    client.put_file(path, open(t.path, 'rb'))
                     t.cleanup()
                 
                 lastUploaded = timestamp
